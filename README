@@ -1,0 +1,2 @@
+This module wrap a lot of functions to constrain the sorbates on the surface of single crystals.
+It is purposely to be imported in GenX interface.
