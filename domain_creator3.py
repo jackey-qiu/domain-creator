@@ -735,6 +735,7 @@ class domain_creator():
         #tridentate configuration under trigonal dipyramid situation
         #see the hexahedra_distortion for detail
         #about calculation of the new third oxygen coors see documents in adding_sorbate_pyramid_distortion_B
+        #open_angle must be higher than the top angle of the triangle determined by the three oxygen,
         p_O1_index=np.where(domain.id==attach_atm_ids_ref[0])
         p_O2_index=np.where(domain.id==attach_atm_ids_ref[1])
         p_O3_index=np.where(domain.id==attach_atm_id_third[0])
@@ -773,9 +774,9 @@ class domain_creator():
         p_O2=pt_ct(domain,p_O2_index,offset[1])*basis
         p_O3_old=pt_ct2(domain,p_O3_index,offset[2])*basis
         p_O3=_cal_coor_o3(p_O1,p_O2,p_O3_old)
-        
-        hexahedra_distortion=hexahedra_distortion.share_face(face=np.array([list(p_O3),list(p_O2),list(p_O1)]),open_angle=open_angle,r_top_down=None,theta_top_down=theta_top_down,switch=True)
-        hexahedra_distortion.share_face_init(flag='1_2')
+        #print p_O1,p_O2,p_O3
+        hexahedra_distortion_case=hexahedra_distortion.share_face(face=np.array([list(p_O3),list(p_O2),list(p_O1)]),open_angle=open_angle,r_top_down=None,theta_top_down=theta_top_down,switch=True)
+        hexahedra_distortion_case.share_face_init(flag='1_2')
         
         def _add_sorbate(domain=None,id_sorbate=None,el='Pb',sorbate_v=[]):
             sorbate_index=None
@@ -788,8 +789,8 @@ class domain_creator():
                 domain.y[sorbate_index]=sorbate_v[1]
                 domain.z[sorbate_index]=sorbate_v[2]
                 
-        _add_sorbate(domain=domain,id_sorbate=pb_id,el='Pb',sorbate_v=hexahedra_distortion.center_point/basis)
-        _add_sorbate(domain=domain,id_sorbate=O_id,el='O',sorbate_v=hexahedra_distortion.p4/basis)
+        _add_sorbate(domain=domain,id_sorbate=pb_id,el='Pb',sorbate_v=hexahedra_distortion_case.center_point/basis)
+        _add_sorbate(domain=domain,id_sorbate=O_id,el='O',sorbate_v=hexahedra_distortion_case.p4/basis)
         dif_value=(p_O3-p_O3_old)/basis
         domain.dx1[p_O3_index],domain.dy1[p_O3_index],domain.dz1[p_O3_index]=dif_value[0],dif_value[1],dif_value[2]
         
