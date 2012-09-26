@@ -1865,6 +1865,7 @@ class domain_creator():
         #match_lib={'O1':[['Fe1','Fe2'],['-x','+y']]}
         #calculate the bond valence of (in this case) O1_Fe1, O1_Fe2, where Fe1 and Fe2 have offset defined by '-x' and '+y' respectively.
         #return a lib with the same key as match_lib, the value for each key is the bond valence calculated
+        #to be inclued in genx script file (see genx files attached with bv, like gx_0086_3_bv.gx
         bond_valence_container={}
         for i in match_lib.keys():
             bond_valence_container[i]=0
