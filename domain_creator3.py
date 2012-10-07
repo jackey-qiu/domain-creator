@@ -1865,9 +1865,9 @@ class domain_creator():
         #match_lib={'O1':[['Fe1','Fe2'],['-x','+y']]}
         #calculate the bond valence of (in this case) O1_Fe1, O1_Fe2, where Fe1 and Fe2 have offset defined by '-x' and '+y' respectively.
         #return a lib with the same key as match_lib, the value for each key is the bond valence calculated
-        #to be inclued in genx script file (see genx files attached with bv, like gx_0086_3_bv.gx
         bond_valence_container={}
         for i in match_lib.keys():
+            match_lib[i].append(0)
             bond_valence_container[i]=0
             
         basis=np.array([5.038,5.434,7.3707])
@@ -1895,14 +1895,11 @@ class domain_creator():
                 return np.array([0.,0.,0.])*basis
     
         for i in match_lib.keys():
-            #if i=='O1_1_0':print 'doing ',i
             index=np.where(domain.id==i)[0][0]
             for k in range(len(match_lib[i][0])):
                 j=match_lib[i][0][k]
-                #if i=='O1_1_0':print 'matching',j,match_lib[i][1][k]
                 index2=np.where(domain.id==j)[0][0]
                 dist=f2(f1(domain,index),f1(domain,index2)+_offset_translate(match_lib[i][1][k]))
-                #if i=='O1_1_0':print 'distance=',dist
                 r0=0
                 if (domain.el[index]=='Pb')|(domain.el[index2]=='Pb'):r0=2.112
                 elif (domain.el[index]=='Fe')|(domain.el[index2]=='Fe'):r0=1.759
@@ -1910,21 +1907,27 @@ class domain_creator():
                 elif (domain.el[index]=='O')&(domain.el[index2]=='O'):#when two Oxygen atoms are too close, the structure explose with high r0, so we are expecting a high bond valence value here.
                     if dist<2.3:r0=10
                     else:r0=0.
-                #if i=='O1_1_0':print 'r0=',r0
                 #if (i=='pb1'):
                     #print j,str(match_lib[i][1][k]),dist,'pb_coor',f1(domain,index)/basis,'O_coor',(f1(domain,index2)+_offset_translate(match_lib[i][1][k]))/basis,np.exp((r0-dist)/0.37)
                 if dist<3.:#take it counted only when they are not two far away
                     bond_valence_container[i]=bond_valence_container[i]+np.exp((r0-dist)/0.37)
-                    #if i=='O1_1_0':print 'bond_valenc=',np.exp((r0-dist)/0.37)
+                    match_lib[i][2]=match_lib[i][2]+1
         for i in bond_valence_container.keys():
             #try to add hydrogen or hydrogen bond to the oxygen with 1.6=2*OH, 1.=OH+H, 0.8=OH and 0.2=H
             index=np.where(domain.id==i)[0][0]
             if (domain.el[index]=='O')|(domain.el[index]=='o'):
-                bond_valence_corrected_value=[1.6,1.,0.8,0.2,0.]
+                case_tag=match_lib[i][2]
+                bond_valence_corrected_value=[0.]
+                if case_tag==1.:
+                    bond_valence_corrected_value=[1.8,1.6,1.2,1.,0.8,0.6,0.4,0.2,0.]
+                elif case_tag==2.:
+                    bond_valence_corrected_value=[1.6,1.,0.8,0.4,0.2,0.]
+                elif case_tag==3.:
+                    bond_valence_corrected_value=[0.8,0.2,0.]
+                else:pass
+                #bond_valence_corrected_value=[1.6,1.,0.8,0.2,0.]
                 ref=np.sign(bond_valence_container[i]+np.array(bond_valence_corrected_value)-2.)*(bond_valence_container[i]+np.array(bond_valence_corrected_value)-2.)
                 bond_valence_container[i]=bond_valence_container[i]+bond_valence_corrected_value[np.where(ref==np.min(ref))[0][0]]
-                #if i=='O1_1_0':
-                    #print 'bond valence=',bond_valence_container
-                    #print 'O1_1_0, offset=',ref
+
         return bond_valence_container
                 
